@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-surface text-ink font-sans;
+    margin: 0;
+    padding: 0;
+  }
+
+  ::selection {
+    @apply bg-primary-200 text-primary-900;
+  }
+}
+
+@layer components {
+  .study-card {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm p-6 transition-all duration-200;
+  }
+
+  .study-card:hover {
+    @apply shadow-md border-gray-200;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-primary-500 text-white font-medium rounded-lg
+           hover:bg-primary-600 active:bg-primary-700 transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-surface-secondary text-ink font-medium rounded-lg border border-gray-200
+           hover:bg-surface-tertiary active:bg-gray-100 transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-ink-secondary font-medium rounded-lg
+           hover:bg-surface-tertiary active:bg-gray-100 transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-gray-200;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-accent-500 text-white font-medium rounded-lg
+           hover:bg-accent-600 active:bg-accent-700 transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-accent-300 focus:ring-offset-2;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-red-500 text-white font-medium rounded-lg
+           hover:bg-red-600 active:bg-red-700 transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-ink
+           placeholder:text-ink-tertiary
+           focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400
+           transition-colors duration-150;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold tracking-tight text-ink;
+  }
+
+  .stat-label {
+    @apply text-sm text-ink-secondary font-medium;
+  }
+
+  .progress-bar {
+    @apply h-2 bg-surface-tertiary rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .tag-blue {
+    @apply tag bg-primary-100 text-primary-700;
+  }
+
+  .tag-green {
+    @apply tag bg-accent-100 text-accent-700;
+  }
+
+  .tag-yellow {
+    @apply tag bg-yellow-100 text-yellow-700;
+  }
+
+  .tag-red {
+    @apply tag bg-red-100 text-red-700;
+  }
+
+  .tag-gray {
+    @apply tag bg-gray-100 text-gray-700;
+  }
+
+  .reading-text {
+    @apply leading-relaxed text-lg text-ink;
+  }
+
+  .reading-text p {
+    @apply mb-4;
+  }
+
+  .word-interactive {
+    @apply cursor-pointer border-b-2 border-dashed border-primary-200
+           hover:border-primary-400 hover:bg-primary-50 transition-all duration-100
+           rounded-sm px-0.5;
+  }
+
+  .word-translated {
+    @apply word-interactive border-primary-400 bg-primary-50 text-primary-700;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 3px;
+  }
+}

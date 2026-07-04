@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startLevel     Int  @default(1)     // initial English level estimate
+  studyDays      Int  @default(0)     // consecutive study days
+  lastStudyDate  DateTime?
+
+  wordProgress   WordProgress[]
+  studyHistory   StudyHistory[]
+  readingSessions ReadingSession[]
+  reviewSchedules ReviewSchedule[]
+}
+
+// ─── Gaokao 3500 Words ───────────────────────────────────
+model Word {
+  id        String   @id @default(cuid())
+  word      String   @unique
+  phonetics String?            // 音标, e.g. /ˈækjərət/
+  partOfSpeech String?         // 词性
+  meaning   String             // 中文释义
+  gaokaoMeaning String?        // 高考常见意思
+  examples  String?            // 高考例句 (JSON array)
+  collocations String?         // 固定搭配 (JSON array)
+  synonyms  String?            // 近义词 (JSON array)
+  antonyms  String?            // 反义词 (JSON array)
+  frequency Int     @default(9999)  // 词频排序 (越小越常见)
+  difficulty Int    @default(5)     // 难度 1-10
+  sourceExam String?           // 来源试卷
+  topic     String?            // 主题分类
+  imageUrl  String?            // 可选图片URL
+
+  createdAt DateTime @default(now())
+  progress  WordProgress[]
+  schedules ReviewSchedule[]
+
+  @@index([frequency])
+  @@index([difficulty])
+}
+
+// ─── User's Word Progress ───────────────────────────────
+model WordProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  wordId    String
+  status    String   @default("new") // new | learning | reviewing | mastered
+  ease      Float    @default(2.5)   // SM-2 ease factor
+  interval  Int      @default(0)     // current interval in days
+  repetitions Int    @default(0)     // number of successful reviews
+  lastReviewDate DateTime?
+  nextReviewDate DateTime?
+  lapses    Int      @default(0)     // times forgotten
+  avgResponseTime Int?               // avg response time in ms
+  totalReviewTime Int @default(0)    // total review time in ms
+  reviewCount Int    @default(0)     // total reviews
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word  @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
+  @@index([userId, nextReviewDate])
+  @@index([userId, status])
+}
+
+// ─── Review Schedule (SM-2) ──────────────────────────────
+model ReviewSchedule {
+  id            String   @id @default(cuid())
+  userId        String
+  wordId        String
+  scheduledDate DateTime  // next scheduled review date
+  interval      Int       // interval in days
+  ease          Float     @default(2.5)
+  repetitions   Int       @default(0)
+  due           Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@index([userId, scheduledDate])
+  @@index([userId, due])
+  @@unique([userId, wordId])
+}
+
+// ─── Daily Study Session ────────────────────────────────
+model StudyHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+  newWords    Int      @default(0)   // new words studied today
+  reviewWords Int      @default(0)   // review words studied today
+  knownCount  Int      @default(0)   // marked as known
+  blurredCount Int     @default(0)   // marked as blurred
+  unknownCount Int     @default(0)   // marked as unknown
+  totalTime   Int      @default(0)   // total study time in seconds
+  completed   Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// ─── AI Generated Reading Articles ───────────────────────
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // the full article text
+  wordCount   Int
+  difficulty  Int      @default(5) // 1-10
+  source      String   @default("ai") // ai | gaokao
+  sourceExam  String?  // which Gaokao paper style
+  topic       String?  // 科技|环保|人物|文化|社会|心理
+  dayRange    String?  // which learning days this covers, e.g. "17-19"
+  vocabCoverage Float?  // percentage of target vocab covered
+
+  createdAt DateTime @default(now())
+
+  questions   Question[]
+  readingSessions ReadingSession[]
+
+  @@index([difficulty])
+  @@index([createdAt])
+}
+
+// ─── Reading Comprehension Questions ─────────────────────
+model Question {
+  id          String   @id @default(cuid())
+  articleId   String
+  type        String   // detail | inference | mainIdea | wordGuess | authorView
+  question    String
+  options     String   // JSON array of 4 options
+  correctAnswer String
+  explanation String?
+  difficulty  Int      @default(5)
+  points      Int      @default(2) // score value
+
+  createdAt DateTime @default(now())
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  answers ReadingAnswer[]
+
+  @@index([articleId])
+}
+
+// ─── Reading Sessions ────────────────────────────────────
+model ReadingSession {
+  id         String   @id @default(cuid())
+  userId     String
+  articleId  String
+  startTime  DateTime @default(now())
+  endTime    DateTime?
+  timeSpent  Int?     // seconds spent reading
+  score      Int?     // correct answers count
+  totalQuestions Int  @default(0)
+  wpm        Int?     // words per minute
+  completed  Boolean  @default(false)
+  vocabLookups Int    @default(0) // how many words clicked
+  lookupWords String? // JSON array of looked-up word IDs
+
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  answers ReadingAnswer[]
+
+  @@index([userId])
+  @@index([userId, completed])
+}
+
+// ─── Reading Answers ─────────────────────────────────────
+model ReadingAnswer {
+  id          String   @id @default(cuid())
+  sessionId   String
+  questionId  String
+  userAnswer  String
+  isCorrect   Boolean
+  timeSpent   Int?     // seconds on this question
+  confidence  Int?     // 1-5 self-evaluated confidence
+
+  createdAt DateTime @default(now())
+
+  session  ReadingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}

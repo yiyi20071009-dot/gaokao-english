@@ -1,0 +1,10 @@
+[build]
+  buildCommand = "npx prisma generate && npx prisma db push && npm run build"
+
+[deploy]
+  startCommand = "npm run start"
+  healthcheckPath = "/"
+  healthcheckTimeout = 100
+
+[volumes]
+  "data" = "/data"
