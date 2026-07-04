@@ -17,7 +17,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#ffffff",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0e87eb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e87eb" },
+  ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -26,8 +30,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
-      <body className="pb-20 md:pt-16 md:pb-0 min-h-screen bg-surface-secondary">
+    <html lang="zh-CN" className="overscroll-none">
+      <head>
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="英语加速器" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: [
+              "if ('serviceWorker' in navigator) {",
+              "  window.addEventListener('load', function() {",
+              "    navigator.serviceWorker.register('/sw.js');",
+              "  });",
+              "}",
+            ].join('\n'),
+          }}
+        />
+        <style>{[
+          'html, body { overscroll-behavior: none; }',
+        ].join('\n')}</style>
+      </head>
+     <body className="pb-20 md:pt-16 md:pb-0 min-h-screen bg-surface-secondary">
         <Navigation />
         <main className="max-w-4xl mx-auto px-4 py-6 md:py-8">
           {children}

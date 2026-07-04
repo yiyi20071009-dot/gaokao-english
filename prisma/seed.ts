@@ -1078,18 +1078,13 @@ const words = [
 ];
 
 async function main() {
+  // Check if data already exists (idempotent)
+  const existingCount = await prisma.word.count();
+  if (existingCount > 0) {
+    console.log(`Database already has ${existingCount} words, skipping seed.`);
+    return;
+  }
   console.log("Seeding Gaokao 3500 words...");
-
-  // Clear existing data
-  await prisma.reviewSchedule.deleteMany();
-  await prisma.wordProgress.deleteMany();
-  await prisma.studyHistory.deleteMany();
-  await prisma.readingAnswer.deleteMany();
-  await prisma.question.deleteMany();
-  await prisma.readingSession.deleteMany();
-  await prisma.article.deleteMany();
-  await prisma.word.deleteMany();
-
   // Insert words with frequency ranking
   for (let i = 0; i < words.length; i++) {
     const w = words[i];

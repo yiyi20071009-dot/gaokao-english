@@ -22,8 +22,8 @@ export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 
-                    md:top-0 md:bottom-auto md:border-t-0 md:border-b">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 bottom-nav-safe
+                    md:top-0 md:bottom-auto md:border-t-0 md:border-b md:pb-0">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center justify-between md:justify-start md:gap-1">
           <Link
